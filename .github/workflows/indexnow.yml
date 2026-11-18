@@ -1,0 +1,28 @@
+name: Ping IndexNow
+
+on: deployment_status
+
+permissions:
+  contents: read
+
+concurrency:
+  group: indexnow-pages
+  cancel-in-progress: true
+
+jobs:
+  submit:
+    if: >-
+      github.event.deployment_status.state == 'success' &&
+      github.event.deployment_status.environment == 'github-pages' &&
+      github.event.deployment.ref == 'master'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.deployment.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+      - run: node scripts/indexnow.mjs
